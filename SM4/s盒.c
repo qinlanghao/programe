@@ -29,6 +29,22 @@ unsigned char Sbox_lookup(unsigned char input)
     unsigned char index = 16 * row + col ;//index下标计算公式，（16×行号）+列号
     return Sbox[index]; //返回Sbox数组里面下标位index的数据
 }
+#include <stdio.h>
+#include <limits.h> // 用于获取 unsigned int 的最大值
+
+// 定义一个异或函数，使用 unsigned int 作为参数类型
+unsigned int xor_funtion(unsigned int a, unsigned int b) {
+    return a ^ b;
+}
+
+// // 测试异或函数的函数   （测试正常）
+// void test_xor_function() {
+//     // 测试用例1: 正常情况
+//     printf("Test xor(5, 3) = %u\n", xor_funtion(5, 3));
+//     // 测试用例2: 0 值
+//     printf("Test xor(0, 0) = %u\n", xor_funtion(0, 0));
+// }
+
 //主程序
 int main() {
     unsigned char input; // 定义一个无符号的字符型数据，可以存储0-255 char类型适合存储ASCII字符以及二进制数据
@@ -38,6 +54,6 @@ int main() {
     printf("S盒输入: 0x%X, 输出: 0x%X\n", input, output);
     // printf("input=%x\n",input);   测试输出代码
     // printf("output=%x\n",output);  测试输出代码
-
+    // test_xor_function();           测试异或函数输出
     return 0;
 }
