@@ -54,17 +54,20 @@ unint32 cyclic_shift(unint32 a,unint32 b)
     return (a << b ) | (a >> (32-b));
 }
 //主程序
-int main() {
-    // printf("input=%x\n",input);   测试输出代码  （正常）
-    // printf("output=%x\n",output);  测试输出代码  （正常）
-    // test_xor_function();           测试异或函数输出  （正常）
-    // unint32 c = cyclic_shift(1,1);   测试循环移位函数输出    （正常）
-    // printf("%x",c);                  测试循环移位函数输出    （正常）
+// int main() {
+//     // printf("input=%x\n",input);   测试输出代码  （正常）
+//     // printf("output=%x\n",output);  测试输出代码  （正常）
+//     // test_xor_function();           测试异或函数输出  （正常）
+//     // unint32 c = cyclic_shift(1,1);   测试循环移位函数输出    （正常）
+//     // printf("%x",c);                  测试循环移位函数输出    （正常）
 
-    unchar8 input; // 定义一个无符号的字符型数据，可以存储0-255 char类型适合存储ASCII字符以及二进制数据
-    printf("请输入2位16进制数:");
-    scanf("%X",&input); //%X表示以16进制接受或输出变量
-    unchar8 output = Sbox_lookup(input);//将输入值放入转换下标函数，并使用output变量接受返回值
-    printf("S盒输入: 0x%X, 输出: 0x%X\n", input, output);
-    return 0;
-}
+//     unchar8 input; // 定义一个无符号的字符型数据，可以存储0-255 char类型适合存储ASCII字符以及二进制数据
+//     printf("请输入2位16进制数:");
+//     scanf("%X",&input); //%X表示以16进制接受或输出变量
+//     unchar8 output = Sbox_lookup(input);//将输入值放入转换下标函数，并使用output变量接受返回值
+//     printf("S盒输入: 0x%X, 输出: 0x%X\n", input, output);
+//     return 0;
+// }
+
+
+
