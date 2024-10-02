@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h> // 用于获取 unint32 的最大值
-
+// Encrypt_Flag    加解密标志
+#define ENCRYPT 1   //加密标志  ENCRYPT
+#define DECRYPT 0   //解密标志  DECRYPT
 typedef unsigned int unint32;  //重命名 unsigned int 
 typedef unsigned char unchar8; //重命名 unsigned char 
 // 定义S盒作为一个一维数组，输入0-255直接查表获取输出
@@ -69,43 +71,59 @@ static const unint32 CK[32] =
 };
 
 //产生密钥过程
-unint32* generate_key()
+unint32* generate_key(unint32 Encrypt_Flag)
 {
-    unchar8 key[16]; // 128位密钥
-    printf("请输入一个128位的初始密钥（16组共32个十六进制数字）：\n");
-    for (int i = 0; i < 16; i++) {
-        scanf("%02hhX", &key[i]);
-    }
-
-    // 将密钥分为4个32位的部分
-    unint32 part0 = ((unint32)key[0] << 24) | ((unint32)key[1] << 16) | ((unint32)key[2] << 8) | key[3];
-    unint32 part1 = ((unint32)key[4] << 24) | ((unint32)key[5] << 16) | ((unint32)key[6] << 8) | key[7];
-    unint32 part2 = ((unint32)key[8] << 24) | ((unint32)key[9] << 16) | ((unint32)key[10] << 8) | key[11];
-    unint32 part3 = ((unint32)key[12] << 24) | ((unint32)key[13] << 16) | ((unint32)key[14] << 8) | key[15];
-
-    /*
-    printf("第一部分：0x%08X\n", part0);   测试输出4个32位的部分
-    printf("第二部分：0x%08X\n", part1);   测试输出4个32位的部分
-    printf("第三部分：0x%08X\n", part2);   测试输出4个32位的部分
-    printf("第四部分：0x%08X\n", part3);   测试输出4个32位的部分
-    */
-    unint32 k0 = xor_funtion(part0,FK[0]);  //获得k0
-    unint32 k1 = xor_funtion(part1,FK[1]);  //获得k1
-    unint32 k2 = xor_funtion(part2,FK[2]);  //获得k2
-    unint32 k3 = xor_funtion(part3,FK[3]);  //获得k3
-    unint32 K_array[36] = {k0,k1,k2,k3}; //获得初始的4个k值
-    // for (int i = 0; i < 4; i++)
-    // {
-    //     printf("0x%08X\n",K_num[i]);  //测试K_num[4]输出是否正常 测试正常
-    //     /* code */
-    // }
-
+    const unchar8 key[16]; // 128位密钥
     unint32* rk_array = (unint32*)malloc(32 * sizeof(unint32)); // 动态分配内存
     if (rk_array == NULL) 
     {
     // 处理内存分配失败
         return NULL;
     }
+    if (Encrypt_Flag)
+    {
+        int count = 0;
+        int judge = 1;
+        while (judge)
+        {
+            printf("请输入一个128位的初始密钥（16组共32个十六进制数字）：\n");
+             for (int i = 0; i < 16; i++) 
+            {
+            if (scanf("%02hhX", &key[i]) == 1)
+            {
+                count++; // 成功读取一个字符，计数器加1
+            }
+            else
+            {
+                while (getchar() != '\n') continue; // 清除错误的输入
+                printf("请重新输入\n");
+                count = 0; // 重置计数器
+                break; // 跳出循环，让用户重新输入
+            }
+            }
+            if (count == 16) // 如果成功读取了16个字符
+            {
+                judge = 0; // 设置judge为0，退出循环
+            }
+        }
+    // 将密钥分为4个32位的部分
+        unint32 part0 = ((unint32)key[0] << 24) | ((unint32)key[1] << 16) | ((unint32)key[2] << 8) | key[3];
+        unint32 part1 = ((unint32)key[4] << 24) | ((unint32)key[5] << 16) | ((unint32)key[6] << 8) | key[7];
+        unint32 part2 = ((unint32)key[8] << 24) | ((unint32)key[9] << 16) | ((unint32)key[10] << 8) | key[11];
+        unint32 part3 = ((unint32)key[12] << 24) | ((unint32)key[13] << 16) | ((unint32)key[14] << 8) | key[15];
+
+        /*
+        printf("第一部分：0x%08X\n", part0);   测试输出4个32位的部分
+        printf("第二部分：0x%08X\n", part1);   测试输出4个32位的部分
+        printf("第三部分：0x%08X\n", part2);   测试输出4个32位的部分
+        printf("第四部分：0x%08X\n", part3);   测试输出4个32位的部分
+        */
+        unint32 k0 = xor_funtion(part0,FK[0]);  //获得k0
+        unint32 k1 = xor_funtion(part1,FK[1]);  //获得k1
+        unint32 k2 = xor_funtion(part2,FK[2]);  //获得k2
+        unint32 k3 = xor_funtion(part3,FK[3]);  //获得k3
+        unint32 K_array[36] = {k0,k1,k2,k3}; //获得初始的4个k值
+
         for (int i = 0; i < 32; i++)
         {
             //第一步 将传入的数组首先和ck进行异或得到一个新的32bit的数据
@@ -130,34 +148,66 @@ unint32* generate_key()
             unint32 k = xor_funtion((xor_funtion(xor_funtion(B,B_left),B_right)),K_array[i]);  //得到子密钥rk i
             K_array[i+4] = k;  //进行数据存储
             rk_array[i] = K_array[i+4];   //进行数据存储
-        }
+    }
+    }
     return rk_array;  //返回最终的结果
+    
 }
 
 //明文加密过程
-unint32* message_encryption(unint32 rk_array[32])
+unint32* message_encryption(unint32 rk_array[32],unint32 Encrypt_Flag,unint32 *old_X_array)
 {
     unchar8 message[16];
-    printf("请输入一个128位的初始明文（16组共32个十六进制数字）：\n");
-    for (int i = 0; i < 16; i++) {
-        scanf("%02hhX", &message[i]);
-    }
-    // 将明文分为4个32位的部分
-    unint32 part_0 = ((unint32)message[0] << 24) | ((unint32)message[1] << 16) | ((unint32)message[2] << 8) | message[3];
-    unint32 part_1 = ((unint32)message[4] << 24) | ((unint32)message[5] << 16) | ((unint32)message[6] << 8) | message[7];
-    unint32 part_2 = ((unint32)message[8] << 24) | ((unint32)message[9] << 16) | ((unint32)message[10] << 8) | message[11];
-    unint32 part_3 = ((unint32)message[12] << 24) | ((unint32)message[13] << 16) | ((unint32)message[14] << 8) | message[15];
     unint32* X_array = (unint32*)malloc(36 * sizeof(unint32)); // 动态分配内存
-    if (X_array == NULL) 
-    {
-    // 处理内存分配失败
-        return NULL;
+    if (Encrypt_Flag)
+    {   
+        int count = 0;
+        int judge = 1;
+        while (judge)
+        {
+            printf("请输入一个128位的初始明文（16组共32个十六进制数字）：\n");
+             for (int i = 0; i < 16; i++) 
+            {
+            if (scanf("%02hhX", &message[i]) == 1)
+            {
+                count++; // 成功读取一个字符，计数器加1
+            }
+            else
+            {
+                while (getchar() != '\n') continue; // 清除错误的输入
+                printf("请重新输入\n");
+                count = 0; // 重置计数器
+                break; // 跳出循环，让用户重新输入
+            }
+            }
+            if (count == 16) // 如果成功读取了16个字符
+            {
+                judge = 0; // 设置judge为0，退出循环
+            }
+        }
+        // 将明文分为4个32位的部分
+        unint32 part_0 = ((unint32)message[0] << 24) | ((unint32)message[1] << 16) | ((unint32)message[2] << 8) | message[3];
+        unint32 part_1 = ((unint32)message[4] << 24) | ((unint32)message[5] << 16) | ((unint32)message[6] << 8) | message[7];
+        unint32 part_2 = ((unint32)message[8] << 24) | ((unint32)message[9] << 16) | ((unint32)message[10] << 8) | message[11];
+        unint32 part_3 = ((unint32)message[12] << 24) | ((unint32)message[13] << 16) | ((unint32)message[14] << 8) | message[15];
+        if (X_array == NULL) 
+            {
+            // 处理内存分配失败
+                return NULL;
+            }
+        unint32 part[4] = {part_0,part_1,part_2,part_3}; //获得初始的4个X值
+        for (int i = 0; i < 4; i++)
+            {
+                X_array[i]=part[i];
+            }
     }
-    unint32 part[4] = {part_0,part_1,part_2,part_3}; //获得初始的4个X值
-    for (int i = 0; i < 4; i++)
+    else
     {
-        X_array[i]=part[i];
-        /* code */
+        for (int i = 0; i < 4; i++)
+        {
+            X_array[i] = old_X_array[i];
+        }
+        
     }
     
     
