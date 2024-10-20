@@ -1,4 +1,4 @@
-#include "test.h"
+#include "sm4_funtion.h"
 
 using namespace std;
 
@@ -98,7 +98,6 @@ unint32* generate_key(unint32 Encrypt_Flag) {
 
 unint32* message_encryption(unint32 rk_array[32], unint32 Encrypt_Flag, unint32* old_X_array) {
     char ch;
-    unchar8 message[16];
     unint32* X_array = (unint32*)malloc(36 * sizeof(unint32));
     if (X_array == NULL) {
         return NULL;
