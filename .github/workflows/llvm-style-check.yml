@@ -4,7 +4,7 @@ on:
   pull_request:
     branches:
       - main  # 指定触发的分支，可根据需要修改
-      - llvm-test
+
 jobs:
   style-check:
     runs-on: ubuntu-latest  # 使用最新的 Ubuntu 环境
@@ -18,25 +18,20 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y clang-format  # 安装 clang-format
 
-      - name: Fetch latest branch information
-        run: |
-          git fetch origin
-
       - name: Extract branch names
         run: |
-          echo "Base Ref: ${{ github.base_ref }}"
-          echo "Head Ref: ${{ github.head_ref }}"
+          # 从 github.base_ref 和 github.head_ref 提取分支名称
           BASE_BRANCH_NAME=$(echo ${{ github.base_ref }} | sed 's|refs/heads/||')
           HEAD_BRANCH_NAME=$(echo ${{ github.head_ref }} | sed 's|refs/heads/||')
-          echo "Base Branch Name: $BASE_BRANCH_NAME"
-          echo "Head Branch Name: $HEAD_BRANCH_NAME"
+          echo "Base Branch: $BASE_BRANCH_NAME"
+          echo "Head Branch: $HEAD_BRANCH_NAME"
           echo "BASE_BRANCH_NAME=$BASE_BRANCH_NAME" >> $GITHUB_ENV
           echo "HEAD_BRANCH_NAME=$HEAD_BRANCH_NAME" >> $GITHUB_ENV
 
       - name: Check code style with clang-format
         run: |
           # 获取当前 PR 的变更文件
-          CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRTUXB $BASE_BRANCH_NAME--$HEAD_BRANCH_NAME)
+          CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRTUXB $BASE_BRANCH_NAME..$HEAD_BRANCH_NAME)
 
           # 检查每个文件是否符合 LLVM 风格
           for FILE in $CHANGED_FILES; do
