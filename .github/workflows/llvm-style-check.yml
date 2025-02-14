@@ -22,6 +22,11 @@ jobs:
         run: |
           git fetch origin
 
+      - name: Print branch information
+        run: |
+          echo "Base Ref: ${{ github.base_ref }}"
+          echo "Head Ref: ${{ github.head_ref }}"
+
       - name: Check code style with clang-format
         run: |
           # 获取当前 PR 的变更文件
