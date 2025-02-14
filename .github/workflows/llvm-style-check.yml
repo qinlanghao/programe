@@ -22,15 +22,21 @@ jobs:
         run: |
           git fetch origin
 
-      - name: Print branch information
+      - name: Extract branch names
         run: |
           echo "Base Ref: ${{ github.base_ref }}"
           echo "Head Ref: ${{ github.head_ref }}"
+          BASE_BRANCH_NAME=$(echo ${{ github.base_ref }} | sed 's|refs/heads/||')
+          HEAD_BRANCH_NAME=$(echo ${{ github.head_ref }} | sed 's|refs/heads/||')
+          echo "Base Branch Name: $BASE_BRANCH_NAME"
+          echo "Head Branch Name: $HEAD_BRANCH_NAME"
+          echo "BASE_BRANCH_NAME=$BASE_BRANCH_NAME" >> $GITHUB_ENV
+          echo "HEAD_BRANCH_NAME=$HEAD_BRANCH_NAME" >> $GITHUB_ENV
 
       - name: Check code style with clang-format
         run: |
           # 获取当前 PR 的变更文件
-          CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRTUXB ${{ github.base_ref }}..${{ github.head_ref }})
+          CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRTUXB $BASE_BRANCH_NAME..$HEAD_BRANCH_NAME)
 
           # 检查每个文件是否符合 LLVM 风格
           for FILE in $CHANGED_FILES; do
