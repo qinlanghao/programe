@@ -310,5 +310,4 @@ void exampleFunction() {
 
      // È±ÉÙ¿ÕÐÐ
      int d = 3;
-     int e = 4;
 }
