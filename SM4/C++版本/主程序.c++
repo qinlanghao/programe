@@ -6,13 +6,13 @@ unint32* generate_key(unint32 Encrypt_Flag) {
     if (!Encrypt_Flag) return nullptr;
     char ch;
     vector<unchar8> key(16);
-    cout << "ÇëÊäÈë³õÊ¼ÃÜÔ¿MK(128bit)" << endl;
+    cout << "è¯·è¾“å…¥åˆå§‹å¯†é’¥MK(128bit)" << endl;
 
     string line;
     bool validInput = false;
     while (!validInput) {
-        cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Çå³ıÊäÈë»º³åÇøÖĞµÄ²ĞÁôÊı¾İ
-        getline(cin, line); // »ñÈ¡ÕûĞĞÊäÈë
+        cin.ignore(numeric_limits<streamsize>::max(), '\n'); // æ¸…é™¤è¾“å…¥ç¼“å†²åŒºä¸­çš„æ®‹ç•™æ•°æ®
+        getline(cin, line); // è·å–æ•´è¡Œè¾“å…¥
         stringstream ss(line);
         validInput = true;
         for (int i = 0; i < 16; ++i) {
@@ -20,16 +20,16 @@ unint32* generate_key(unint32 Encrypt_Flag) {
             if (i < 15) {
                 getline(ss, byteStr, ' ');
             } else {
-                getline(ss, byteStr); // ×îºóÒ»¸öÊıºó²»¸ú¿Õ¸ñ
+                getline(ss, byteStr); // æœ€åä¸€ä¸ªæ•°åä¸è·Ÿç©ºæ ¼
             }
             if (byteStr.length() != 2 || sscanf(byteStr.c_str(), "%hhX", &key[i]) != 1) {
-                cout << "ÎŞĞ§ÊäÈë£¬Ã¿¸öÊ®Áù½øÖÆÊı±ØĞëÊÇÁ½¸ö×Ö·û¡£" << endl;
+                cout << "æ— æ•ˆè¾“å…¥ï¼Œæ¯ä¸ªåå…­è¿›åˆ¶æ•°å¿…é¡»æ˜¯ä¸¤ä¸ªå­—ç¬¦ã€‚" << endl;
                 validInput = false;
                 break;
             }
         }
         if (!validInput) {
-            cout << "ÇëÖØĞÂÊäÈë³õÊ¼ÃÜÔ¿MK(128bit, ¹²16¸öÁ½Î»Ê®Áù½øÖÆÊı)£¬Ã¿Á½¸öÊıÖ®¼äÓÃ¿Õ¸ñ·Ö¸ô£º" << endl;
+            cout << "è¯·é‡æ–°è¾“å…¥åˆå§‹å¯†é’¥MK(128bit, å…±16ä¸ªä¸¤ä½åå…­è¿›åˆ¶æ•°)ï¼Œæ¯ä¸¤ä¸ªæ•°ä¹‹é—´ç”¨ç©ºæ ¼åˆ†éš”ï¼š" << endl;
         }
     }
 
@@ -38,7 +38,7 @@ unint32* generate_key(unint32 Encrypt_Flag) {
     unint32 part2 = ((key[8] << 24) | (key[9] << 16) | (key[10] << 8) | key[11]);
     unint32 part3 = ((key[12] << 24) | (key[13] << 16) | (key[14] << 8) | key[15]);
 
-    cout << "³õÊ¼ÃÜÔ¿MKÒÔ¼°k0,k1,k2,k3µÄÖµ" <<endl;
+    cout << "åˆå§‹å¯†é’¥MKä»¥åŠk0,k1,k2,k3çš„å€¼" <<endl;
     cout << "MK=" ; 
     for (int i = 0; i < 16; ++i) {
         cout << hex << setw(2) << setfill('0') << uppercase << static_cast<int>(key[i]);
@@ -56,7 +56,7 @@ unint32* generate_key(unint32 Encrypt_Flag) {
     if (rk_array == nullptr) {
         return nullptr;
     }
-    cout << "Éú³ÉÍØÕ¹ÃÜÔ¿? (Y/N): ";
+    cout << "ç”Ÿæˆæ‹“å±•å¯†é’¥? (Y/N): ";
     cin >> ch;
 
     unint32 k0 = xor_function(part0, FK[0]);
@@ -104,14 +104,14 @@ unint32* message_encryption(unint32 rk_array[32], unint32 Encrypt_Flag, unint32*
     }
 if (Encrypt_Flag) {
     unchar8 message[16];
-    cout << "ÇëÊäÈë128Î»ÏûÏ¢M(16×Ö½Ú):\n";
+    cout << "è¯·è¾“å…¥128ä½æ¶ˆæ¯M(16å­—èŠ‚):\n";
 
     string line;
     bool validInput = false;
     while (!validInput) {
-        // ÔÚÕâÀïÇå³ıÊäÈë»º³åÇøÖĞµÄ²ĞÁôÊı¾İ£¬È·±£ÏÂÒ»´ÎÊäÈëÊ±»º³åÇøÊÇ¿ÕµÄ
+        // åœ¨è¿™é‡Œæ¸…é™¤è¾“å…¥ç¼“å†²åŒºä¸­çš„æ®‹ç•™æ•°æ®ï¼Œç¡®ä¿ä¸‹ä¸€æ¬¡è¾“å…¥æ—¶ç¼“å†²åŒºæ˜¯ç©ºçš„
         cin.ignore(numeric_limits<streamsize>::max(), '\n'); 
-        getline(cin, line); // »ñÈ¡ÕûĞĞÊäÈë
+        getline(cin, line); // è·å–æ•´è¡Œè¾“å…¥
         stringstream ss(line);
         validInput = true;
         for (int i = 0; i < 16; ++i) {
@@ -119,16 +119,16 @@ if (Encrypt_Flag) {
             if (i < 15) {
                 getline(ss, byteStr, ' ');
             } else {
-                getline(ss, byteStr); // ×îºóÒ»¸öÊıºó²»¸ú¿Õ¸ñ
+                getline(ss, byteStr); // æœ€åä¸€ä¸ªæ•°åä¸è·Ÿç©ºæ ¼
             }
             if (byteStr.length() != 2 || sscanf(byteStr.c_str(), "%hhX", &message[i]) != 1) {
-                cout << "ÎŞĞ§ÊäÈë£¬Ã¿¸öÊ®Áù½øÖÆÊı±ØĞëÊÇÁ½¸ö×Ö·û¡£\n";
+                cout << "æ— æ•ˆè¾“å…¥ï¼Œæ¯ä¸ªåå…­è¿›åˆ¶æ•°å¿…é¡»æ˜¯ä¸¤ä¸ªå­—ç¬¦ã€‚\n";
                 validInput = false;
                 break;
             }
         }
         if (!validInput) {
-            cout << "ÇëÖØĞÂÊäÈë128Î»ÏûÏ¢M(16×Ö½Ú):\n";
+            cout << "è¯·é‡æ–°è¾“å…¥128ä½æ¶ˆæ¯M(16å­—èŠ‚):\n";
         }
     }
 
@@ -137,7 +137,7 @@ if (Encrypt_Flag) {
         unint32 part_2 = ((message[8] << 24) | (message[9] << 16) | (message[10] << 8) | message[11]);
         unint32 part_3 = ((message[12] << 24) | (message[13] << 16) | (message[14] << 8) | message[15]);
 
-        cout << "ÏûÏ¢M·ÖÎªËÄ¸ö×Ö:X0, X1, X2, X3\n";
+        cout << "æ¶ˆæ¯Måˆ†ä¸ºå››ä¸ªå­—:X0, X1, X2, X3\n";
         cout << "M=";
         for (int i = 0; i < 16; i++) {
             cout << hex << setw(2) << setfill('0') << uppercase <<static_cast<int>(message[i]);
@@ -175,23 +175,23 @@ if (Encrypt_Flag) {
         unint32 X = xor_function(C, X_array[i]);
         X_array[i + 4] = X;
             if (i == 0 && Encrypt_Flag == 1) {
-        cout << "¼ÆËãÓÉX1,X2,X3¼°µÚ1¸öÍØÕ¹ÃÜÔ¿rk0Éú³ÉµÄÖĞ¼äÖµU? (Y/N): ";
+        cout << "è®¡ç®—ç”±X1,X2,X3åŠç¬¬1ä¸ªæ‹“å±•å¯†é’¥rk0ç”Ÿæˆçš„ä¸­é—´å€¼U? (Y/N): ";
         cin >> ch;
         if (ch == 'Y' || ch == 'y') {
-            cout << "µÚÒ»ÂÖÖĞ¼ä½á¹ûU=0x" << hex << first_step << " u0=0x" << hex << static_cast<int>(a0) << " u1=0x" << hex << static_cast<int>(a1) << " u2=0x" << hex << static_cast<int>(a2) << " u3=0x" << hex << uppercase << static_cast<int>(a3) << endl;
-            cout << "¼ÆËãÓÉUÍ¨¹ı·ÇÏßĞÔ¦Ó±ä»»ºóµÄÖĞ¼äÖµV? (Y/N): ";
+            cout << "ç¬¬ä¸€è½®ä¸­é—´ç»“æœU=0x" << hex << first_step << " u0=0x" << hex << static_cast<int>(a0) << " u1=0x" << hex << static_cast<int>(a1) << " u2=0x" << hex << static_cast<int>(a2) << " u3=0x" << hex << uppercase << static_cast<int>(a3) << endl;
+            cout << "è®¡ç®—ç”±Ué€šè¿‡éçº¿æ€§Ï„å˜æ¢åçš„ä¸­é—´å€¼V? (Y/N): ";
             cin >> ch;
             if (ch == 'Y' || ch == 'y') {
-                cout << "UµÄSbox±ä»»½á¹ûV=0x" << hex << B << " v0=0x" << hex << static_cast<int>(b0) << " v1=0x" << hex << static_cast<int>(b1) << " v2=0x" << hex << static_cast<int>(b2) << " v3=0x" << hex << uppercase << static_cast<int>(b3) << endl;
-                cout << "¼ÆËãÓÉÖĞ¼äÖµVÍ¨¹ıÏßĞÔL±ä»»µÃµ½µÄÖĞ¼äÖµW? (Y/N): ";
+                cout << "Uçš„Sboxå˜æ¢ç»“æœV=0x" << hex << B << " v0=0x" << hex << static_cast<int>(b0) << " v1=0x" << hex << static_cast<int>(b1) << " v2=0x" << hex << static_cast<int>(b2) << " v3=0x" << hex << uppercase << static_cast<int>(b3) << endl;
+                cout << "è®¡ç®—ç”±ä¸­é—´å€¼Vé€šè¿‡çº¿æ€§Lå˜æ¢å¾—åˆ°çš„ä¸­é—´å€¼W? (Y/N): ";
                 cin >> ch;
                 if (ch == 'Y' || ch == 'y') {
-                    cout << "ÖĞ¼äÖµW=0x" << hex << C << uppercase << endl;
-                    cout << "¼ÆËãÓÉX0ºÍÖĞ¼äÖµWÉú³ÉµÄX4µÄÖµ? (Y/N): ";
+                    cout << "ä¸­é—´å€¼W=0x" << hex << C << uppercase << endl;
+                    cout << "è®¡ç®—ç”±X0å’Œä¸­é—´å€¼Wç”Ÿæˆçš„X4çš„å€¼? (Y/N): ";
                     cin >> ch;
                     if (ch == 'Y' || ch == 'y') {
-                        cout << "µÚÒ»ÂÖµÄ×îÖÕ½á¹ûX4=0x" << hex << X << uppercase <<endl;
-                        cout << "¼ÆËãµÚ2-32ÂÖ½á¹û? (Y/N): ";
+                        cout << "ç¬¬ä¸€è½®çš„æœ€ç»ˆç»“æœX4=0x" << hex << X << uppercase <<endl;
+                        cout << "è®¡ç®—ç¬¬2-32è½®ç»“æœ? (Y/N): ";
                         cin >> ch;
                         if (ch == 'Y' || ch == 'y') {}
                         else {
@@ -217,11 +217,11 @@ if (Encrypt_Flag == 1) {
     for (int i = 0; i < 32; i++) {
         cout << "X_array[" << dec <<i + 4 << "]:0x" << hex << X_array[i + 4] << uppercase <<endl;
     }
-    cout << "¼ÆËãÓÉX32,X33,X34,X35·´Ğò±ä»»µÄ½á¹û¼°ÃÜÎÄ·Ö×é? (Y/N): ";
+    cout << "è®¡ç®—ç”±X32,X33,X34,X35ååºå˜æ¢çš„ç»“æœåŠå¯†æ–‡åˆ†ç»„? (Y/N): ";
     cin >> ch;
     if (ch == 'Y' || ch == 'y') {
         cout << "Y0=0x" << hex << X_array[35] << " Y1=0x" << hex << X_array[34] << " Y2=0x" << hex << X_array[33] << " Y3=0x" << hex << X_array[32] << uppercase << endl;
-        cout << "ÃÜÎÄ·Ö×éC=";
+        cout << "å¯†æ–‡åˆ†ç»„C=";
     } 
     else {
         free(X_array);
@@ -248,16 +248,16 @@ unint32* reverse_X_array = nullptr;
 unint32 temp;
 while (flag) {
     cout << "=============================================================\n";
-    cout << "                 SMS4¼ÓÃÜ½âÃÜ³ÌĞò\n";
+    cout << "                 SMS4åŠ å¯†è§£å¯†ç¨‹åº\n";
     cout << "=============================================================\n";
-    cout << "=====================1.¼ÓÃÜ==========================\n";
-    cout << "=====================2.½âÃÜ==========================\n";
-    cout << "=====================3.ÍË³ö==========================\n";
+    cout << "=====================1.åŠ å¯†==========================\n";
+    cout << "=====================2.è§£å¯†==========================\n";
+    cout << "=====================3.é€€å‡º==========================\n";
     cout << "=============================================================\n";
 
     cin >> choice;
     if (choice < 1 || choice > 3) {
-        cout << "ÎŞĞ§ÊäÈë£¬ÇëÖØĞÂÑ¡Ôñ:\n";
+        cout << "æ— æ•ˆè¾“å…¥ï¼Œè¯·é‡æ–°é€‰æ‹©:\n";
         continue;
     }
 
@@ -268,7 +268,7 @@ while (flag) {
         break;
     case 2:
         if (!rk_array || !X_array) {
-            cout << "ÇëÏÈÖ´ĞĞ¼ÓÃÜ²Ù×÷(Ñ¡Ôñ1)ÔÙÖ´ĞĞ½âÃÜ²Ù×÷¡£\n";
+            cout << "è¯·å…ˆæ‰§è¡ŒåŠ å¯†æ“ä½œ(é€‰æ‹©1)å†æ‰§è¡Œè§£å¯†æ“ä½œã€‚\n";
             break;
         }
         for (int i = 0; i < 16; i++) {
@@ -277,7 +277,7 @@ while (flag) {
             rk_array[31 - i] = temp;
         }
         reverse_X_array = message_encryption(rk_array, DECRYPT, X_array);
-        cout << "½âÃÜºóµÄÃ÷ÎÄ:";
+        cout << "è§£å¯†åçš„æ˜æ–‡:";
         for (int i = 0; i < 4; i++) {
             cout << hex << setw(8) << reverse_X_array[i] << " "<< uppercase ;
         }
@@ -285,7 +285,7 @@ while (flag) {
         free(reverse_X_array);
         break;
     case 3:
-        cout << "ÍË³ö³ÌĞò¡£\n";
+        cout << "é€€å‡ºç¨‹åºã€‚\n";
         flag = 0;
         break;
     }
@@ -297,15 +297,31 @@ if (X_array) free(X_array);
 return 0;
 }
 
-// Example of non-LLVM style code
-void exampleFunction() {
-     int a = 0; // ¶îÍâµÄ¿Õ¸ñ
-     int b= 1;  // È±ÉÙ¿Õ¸ñ
-     int c =2;  // È±ÉÙ¿Õ¸ñ
-     int d =  3; // ¶àÓàµÄ¿Õ¸ñ
+// Test.cpp
+// ä¸ç¬¦åˆ LLVM é£æ ¼çš„ä»£ç ç¤ºä¾‹
 
-     // ²»Ò»ÖÂµÄÀ¨ºÅ·ç¸ñ
+// ç¼©è¿›ä¸ä¸€è‡´
+void exampleFunction1() {
+     int a = 0; // é¢å¤–çš„ç©ºæ ¼
+     int b= 1;  // ç¼ºå°‘ç©ºæ ¼
+     int c =2;  // ç¼ºå°‘ç©ºæ ¼
+     int d =  3; // å¤šä½™çš„ç©ºæ ¼
+
+     // æ‹¬å·é£æ ¼ä¸ä¸€è‡´
      if (a == 0) {b = 1;}
      else {c = 2;}
 
+     // ç¼ºå°‘ç©ºæ ¼å’Œæ‹¬å·
+     for(int i=0; i<10; i++){ printf("i: %d\n", i); }
+
+     // å‡½æ•°ä½“æœ«å°¾ç¼ºå°‘ç©ºè¡Œ
+     return;
 }
+
+// å˜é‡å‘½åä¸è§„èŒƒï¼ˆä½¿ç”¨ä¸‹åˆ’çº¿å‘½åæ³•ï¼‰
+void example_function_2() {
+    int my_variable = 0; // ä½¿ç”¨ä¸‹åˆ’çº¿ï¼Œä¸ç¬¦åˆ LLVM é£æ ¼
+    // å‡½æ•°ä½“å†…æœ‰å¤šä¸ªè¿ç»­ç©ºè¡Œ
+}
+
+// æ–‡ä»¶æœ«å°¾æœ‰ç©ºè¡Œ
