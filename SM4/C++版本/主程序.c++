@@ -308,6 +308,4 @@ void exampleFunction() {
      if (a == 0) {b = 1;}
      else {c = 2;}
 
-     // È±ÉÙ¿ÕÐÐ
-     int d = 3;
 }
