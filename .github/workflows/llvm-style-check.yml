@@ -3,7 +3,8 @@ name: LLVM Style Check with Clang-Format
 on:
   pull_request:
     branches:
-      - main  # 指定触发的分支，可根据需要修改
+      - main  
+      - llvm-test  # 指定触发的分支，可根据需要修改
 
 jobs:
   style-check:
