@@ -3,50 +3,63 @@ name: LLVM Style Check with Clang-Format
 on:
   pull_request:
     branches:
-      - main  # 指定触发的分支，可根据需要修改
+      - main
+      - llvm-test
 
 jobs:
   style-check:
-    runs-on: ubuntu-latest  # 使用最新的 Ubuntu 环境
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4  # 检出代码
+        uses: actions/checkout@v4
 
       - name: Install clang-format
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang-format  # 安装 clang-format
+          sudo apt-get install -y clang-format
 
-      - name: Extract branch names
+      - name: Fetch all branches
+        run: git fetch --prune --unshallow
+
+      - name: Determine base and head branches
         run: |
-          # 从 github.base_ref 和 github.head_ref 提取分支名称
-          BASE_BRANCH_NAME=$(echo ${{ github.base_ref }} | sed 's|refs/heads/||')
-          HEAD_BRANCH_NAME=$(echo ${{ github.head_ref }} | sed 's|refs/heads/||')
-          echo "Base Branch: $BASE_BRANCH_NAME"
-          echo "Head Branch: $HEAD_BRANCH_NAME"
-          echo "BASE_BRANCH_NAME=$BASE_BRANCH_NAME" >> $GITHUB_ENV
-          echo "HEAD_BRANCH_NAME=$HEAD_BRANCH_NAME" >> $GITHUB_ENV
+          echo "Base Ref: ${{ github.base_ref }}"
+          echo "Head Ref: ${{ github.head_ref }}"
+          echo "BASE_BRANCH_NAME=${{ github.base_ref }}" >> $GITHUB_ENV
+          echo "HEAD_BRANCH_NAME=${{ github.head_ref }}" >> $GITHUB_ENV
 
       - name: Check code style with clang-format
         run: |
           # 获取当前 PR 的变更文件
-          CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRTUXB $BASE_BRANCH_NAME..$HEAD_BRANCH_NAME)
+          CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRTUXB origin/$BASE_BRANCH_NAME origin/$HEAD_BRANCH_NAME)
 
-          # 检查每个文件是否符合 LLVM 风格
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "No relevant files changed."
+            exit 0
+          fi
+
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+
+          # 记录格式化错误的文件
+          ERROR_FOUND=0
+
           for FILE in $CHANGED_FILES; do
-            if [[ $FILE =~ \.(cpp|h|hpp)$ ]]; then  # 只检查 C++ 文件
-              # 获取格式化后的代码
-              FORMATTED_CODE=$(clang-format -style=llvm "$FILE")
-
-              # 比较原始代码和格式化后的代码
-              if [ "$(cat "$FILE")" != "$FORMATTED_CODE" ]; then
-                echo "Style error in $FILE"
-                echo "Code does not conform to LLVM style."
-                echo "Formatted code:"
-                echo "$FORMATTED_CODE"
-                exit 1
+            if [[ $FILE =~ \.(cpp|h|hpp)$ ]]; then  # 只检查 C++ 相关文件
+              echo "Checking $FILE..."
+              
+              # 运行 clang-format 并检查格式
+              if ! clang-format -style=llvm --dry-run -Werror "$FILE"; then
+                echo "❌ Style issue in $FILE"
+                ERROR_FOUND=1
               fi
             fi
           done
-          echo "All files conform to LLVM style."
+
+          if [ "$ERROR_FOUND" -eq 1 ]; then
+            echo "Code style issues detected. Please run clang-format before committing."
+            exit 1
+          fi
+
+          echo "✅ All files conform to LLVM style."
