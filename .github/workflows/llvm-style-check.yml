@@ -36,7 +36,7 @@ jobs:
       - name: Check code style with clang-format
         run: |
           # 获取当前 PR 的变更文件
-          CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRTUXB $BASE_BRANCH_NAME..$HEAD_BRANCH_NAME)
+          CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRTUXB $BASE_BRANCH_NAME--$HEAD_BRANCH_NAME)
 
           # 检查每个文件是否符合 LLVM 风格
           for FILE in $CHANGED_FILES; do
