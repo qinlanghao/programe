@@ -1,0 +1,49 @@
+name: LLVM Style Check with Clang-Tidy
+
+on:
+  pull_request:
+    branches:
+      - main  # 指定触发的分支，可根据需要修改
+
+jobs:
+  style-check:
+    runs-on: ubuntu-latest  # 使用最新的 Ubuntu 环境
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4  # 检出代码
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'  # 设置 Python 环境
+
+      - name: Install clang-tidy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-tidy  # 安装 clang-tidy
+
+      - name: Generate compile_commands.json
+        run: |
+          # 如果你的项目使用 CMake，可以生成 compile_commands.json
+          mkdir build
+          cd build
+          cmake .. -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+          cd ..
+
+      - name: Run clang-tidy
+        run: |
+          # 获取当前 PR 的变更文件
+          CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRTUXB ${{ github.base_ref }}..${{ github.head_ref }})
+
+          # 检查每个文件是否符合 LLVM 风格
+          for FILE in $CHANGED_FILES; do
+            if [[ $FILE =~ \.(cpp|h|hpp)$ ]]; then  # 只检查 C++ 文件
+              clang-tidy -p build -checks=* -style=llvm $FILE -- -header-filter=.* 2>&1 | tee tidy.log
+              if grep -q "error:" tidy.log; then
+                echo "Style errors found in $FILE"
+                exit 1
+              fi
+            fi
+          done
+          echo "All files conform to LLVM style."
