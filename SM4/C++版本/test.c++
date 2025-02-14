@@ -1,3 +1,23 @@
+// Test.cpp
+// 不符合 LLVM 风格的代码示例
+
+// 缩进不一致
+void exampleFunction1() {
+    int a = 0; // 额外的空格
+    int b= 1;  // 缺少空格
+    int c =2;  // 缺少空格
+    int d =  3; // 多余的空格
+
+    // 括号风格不一致
+    if (a == 0) {b = 1;}
+    else {c = 2;}
+
+    // 缺少空格和括号
+    for(int i=0; i<10; i++){ printf("i: %d\n", i); }
+
+    // 函数体末尾缺少空行
+    return;
+}
 
 // 变量命名不规范（使用下划线命名法）
 void example_function_2() {
