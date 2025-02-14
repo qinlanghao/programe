@@ -299,5 +299,16 @@ return 0;
 
 // Example of non-LLVM style code
 void exampleFunction() {
-     int a = 0; // Inconsistent indentation
+     int a = 0; // 额外的空格
+     int b= 1;  // 缺少空格
+     int c =2;  // 缺少空格
+     int d =  3; // 多余的空格
+
+     // 不一致的括号风格
+     if (a == 0) {b = 1;}
+     else {c = 2;}
+
+     // 缺少空行
+     int d = 3;
+     int e = 4;
 }
