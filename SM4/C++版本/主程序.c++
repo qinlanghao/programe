@@ -6,13 +6,13 @@ unint32* generate_key(unint32 Encrypt_Flag) {
     if (!Encrypt_Flag) return nullptr;
     char ch;
     vector<unchar8> key(16);
-    cout << "请输入初始密钥MK(128bit)" << endl;
+    cout << "???????MK(128bit)" << endl;
 
     string line;
     bool validInput = false;
     while (!validInput) {
-        cin.ignore(numeric_limits<streamsize>::max(), '\n'); // 清除输入缓冲区中的残留数据
-        getline(cin, line); // 获取整行输入
+        cin.ignore(numeric_limits<streamsize>::max(), '\n'); // ?????????????
+        getline(cin, line); // ??????
         stringstream ss(line);
         validInput = true;
         for (int i = 0; i < 16; ++i) {
@@ -20,16 +20,16 @@ unint32* generate_key(unint32 Encrypt_Flag) {
             if (i < 15) {
                 getline(ss, byteStr, ' ');
             } else {
-                getline(ss, byteStr); // 最后一个数后不跟空格
+                getline(ss, byteStr); // ??????????
             }
             if (byteStr.length() != 2 || sscanf(byteStr.c_str(), "%hhX", &key[i]) != 1) {
-                cout << "无效输入，每个十六进制数必须是两个字符。" << endl;
+                cout << "????????????????????" << endl;
                 validInput = false;
                 break;
             }
         }
         if (!validInput) {
-            cout << "请重新输入初始密钥MK(128bit, 共16个两位十六进制数)，每两个数之间用空格分隔：" << endl;
+            cout << "?????????MK(128bit, ?16????????)?????????????" << endl;
         }
     }
 
@@ -38,7 +38,7 @@ unint32* generate_key(unint32 Encrypt_Flag) {
     unint32 part2 = ((key[8] << 24) | (key[9] << 16) | (key[10] << 8) | key[11]);
     unint32 part3 = ((key[12] << 24) | (key[13] << 16) | (key[14] << 8) | key[15]);
 
-    cout << "初始密钥MK以及k0,k1,k2,k3的值" <<endl;
+    cout << "????MK??k0,k1,k2,k3??" <<endl;
     cout << "MK=" ; 
     for (int i = 0; i < 16; ++i) {
         cout << hex << setw(2) << setfill('0') << uppercase << static_cast<int>(key[i]);
@@ -56,7 +56,7 @@ unint32* generate_key(unint32 Encrypt_Flag) {
     if (rk_array == nullptr) {
         return nullptr;
     }
-    cout << "生成拓展密钥? (Y/N): ";
+    cout << "??????? (Y/N): ";
     cin >> ch;
 
     unint32 k0 = xor_function(part0, FK[0]);
@@ -104,14 +104,14 @@ unint32* message_encryption(unint32 rk_array[32], unint32 Encrypt_Flag, unint32*
     }
 if (Encrypt_Flag) {
     unchar8 message[16];
-    cout << "请输入128位消息M(16字节):\n";
+    cout << "???128???M(16??):\n";
 
     string line;
     bool validInput = false;
     while (!validInput) {
-        // 在这里清除输入缓冲区中的残留数据，确保下一次输入时缓冲区是空的
+        // ???????????????????????????????
         cin.ignore(numeric_limits<streamsize>::max(), '\n'); 
-        getline(cin, line); // 获取整行输入
+        getline(cin, line); // ??????
         stringstream ss(line);
         validInput = true;
         for (int i = 0; i < 16; ++i) {
@@ -119,16 +119,16 @@ if (Encrypt_Flag) {
             if (i < 15) {
                 getline(ss, byteStr, ' ');
             } else {
-                getline(ss, byteStr); // 最后一个数后不跟空格
+                getline(ss, byteStr); // ??????????
             }
             if (byteStr.length() != 2 || sscanf(byteStr.c_str(), "%hhX", &message[i]) != 1) {
-                cout << "无效输入，每个十六进制数必须是两个字符。\n";
+                cout << "????????????????????\n";
                 validInput = false;
                 break;
             }
         }
         if (!validInput) {
-            cout << "请重新输入128位消息M(16字节):\n";
+            cout << "?????128???M(16??):\n";
         }
     }
 
@@ -137,7 +137,7 @@ if (Encrypt_Flag) {
         unint32 part_2 = ((message[8] << 24) | (message[9] << 16) | (message[10] << 8) | message[11]);
         unint32 part_3 = ((message[12] << 24) | (message[13] << 16) | (message[14] << 8) | message[15]);
 
-        cout << "消息M分为四个字:X0, X1, X2, X3\n";
+        cout << "??M?????:X0, X1, X2, X3\n";
         cout << "M=";
         for (int i = 0; i < 16; i++) {
             cout << hex << setw(2) << setfill('0') << uppercase <<static_cast<int>(message[i]);
@@ -175,23 +175,23 @@ if (Encrypt_Flag) {
         unint32 X = xor_function(C, X_array[i]);
         X_array[i + 4] = X;
             if (i == 0 && Encrypt_Flag == 1) {
-        cout << "计算由X1,X2,X3及第1个拓展密钥rk0生成的中间值U? (Y/N): ";
+        cout << "???X1,X2,X3??1?????rk0??????U? (Y/N): ";
         cin >> ch;
         if (ch == 'Y' || ch == 'y') {
-            cout << "第一轮中间结果U=0x" << hex << first_step << " u0=0x" << hex << static_cast<int>(a0) << " u1=0x" << hex << static_cast<int>(a1) << " u2=0x" << hex << static_cast<int>(a2) << " u3=0x" << hex << uppercase << static_cast<int>(a3) << endl;
-            cout << "计算由U通过非线性τ变换后的中间值V? (Y/N): ";
+            cout << "???????U=0x" << hex << first_step << " u0=0x" << hex << static_cast<int>(a0) << " u1=0x" << hex << static_cast<int>(a1) << " u2=0x" << hex << static_cast<int>(a2) << " u3=0x" << hex << uppercase << static_cast<int>(a3) << endl;
+            cout << "???U?????????????V? (Y/N): ";
             cin >> ch;
             if (ch == 'Y' || ch == 'y') {
-                cout << "U的Sbox变换结果V=0x" << hex << B << " v0=0x" << hex << static_cast<int>(b0) << " v1=0x" << hex << static_cast<int>(b1) << " v2=0x" << hex << static_cast<int>(b2) << " v3=0x" << hex << uppercase << static_cast<int>(b3) << endl;
-                cout << "计算由中间值V通过线性L变换得到的中间值W? (Y/N): ";
+                cout << "U?Sbox????V=0x" << hex << B << " v0=0x" << hex << static_cast<int>(b0) << " v1=0x" << hex << static_cast<int>(b1) << " v2=0x" << hex << static_cast<int>(b2) << " v3=0x" << hex << uppercase << static_cast<int>(b3) << endl;
+                cout << "??????V????L????????W? (Y/N): ";
                 cin >> ch;
                 if (ch == 'Y' || ch == 'y') {
-                    cout << "中间值W=0x" << hex << C << uppercase << endl;
-                    cout << "计算由X0和中间值W生成的X4的值? (Y/N): ";
+                    cout << "???W=0x" << hex << C << uppercase << endl;
+                    cout << "???X0????W???X4??? (Y/N): ";
                     cin >> ch;
                     if (ch == 'Y' || ch == 'y') {
-                        cout << "第一轮的最终结果X4=0x" << hex << X << uppercase <<endl;
-                        cout << "计算第2-32轮结果? (Y/N): ";
+                        cout << "????????X4=0x" << hex << X << uppercase <<endl;
+                        cout << "???2-32???? (Y/N): ";
                         cin >> ch;
                         if (ch == 'Y' || ch == 'y') {}
                         else {
@@ -217,11 +217,11 @@ if (Encrypt_Flag == 1) {
     for (int i = 0; i < 32; i++) {
         cout << "X_array[" << dec <<i + 4 << "]:0x" << hex << X_array[i + 4] << uppercase <<endl;
     }
-    cout << "计算由X32,X33,X34,X35反序变换的结果及密文分组? (Y/N): ";
+    cout << "???X32,X33,X34,X35????????????? (Y/N): ";
     cin >> ch;
     if (ch == 'Y' || ch == 'y') {
         cout << "Y0=0x" << hex << X_array[35] << " Y1=0x" << hex << X_array[34] << " Y2=0x" << hex << X_array[33] << " Y3=0x" << hex << X_array[32] << uppercase << endl;
-        cout << "密文分组C=";
+        cout << "????C=";
     } 
     else {
         free(X_array);
@@ -248,16 +248,16 @@ unint32* reverse_X_array = nullptr;
 unint32 temp;
 while (flag) {
     cout << "=============================================================\n";
-    cout << "                 SMS4加密解密程序\n";
+    cout << "                 SMS4??????\n";
     cout << "=============================================================\n";
-    cout << "=====================1.加密==========================\n";
-    cout << "=====================2.解密==========================\n";
-    cout << "=====================3.退出==========================\n";
+    cout << "=====================1.??==========================\n";
+    cout << "=====================2.??==========================\n";
+    cout << "=====================3.??==========================\n";
     cout << "=============================================================\n";
 
     cin >> choice;
     if (choice < 1 || choice > 3) {
-        cout << "无效输入，请重新选择:\n";
+        cout << "??????????:\n";
         continue;
     }
 
@@ -268,7 +268,7 @@ while (flag) {
         break;
     case 2:
         if (!rk_array || !X_array) {
-            cout << "请先执行加密操作(选择1)再执行解密操作。\n";
+            cout << "????????(??1)????????\n";
             break;
         }
         for (int i = 0; i < 16; i++) {
@@ -277,7 +277,7 @@ while (flag) {
             rk_array[31 - i] = temp;
         }
         reverse_X_array = message_encryption(rk_array, DECRYPT, X_array);
-        cout << "解密后的明文:";
+        cout << "??????:";
         for (int i = 0; i < 4; i++) {
             cout << hex << setw(8) << reverse_X_array[i] << " "<< uppercase ;
         }
@@ -285,7 +285,7 @@ while (flag) {
         free(reverse_X_array);
         break;
     case 3:
-        cout << "退出程序。\n";
+        cout << "?????\n";
         flag = 0;
         break;
     }
@@ -298,30 +298,17 @@ return 0;
 }
 
 // Test.cpp
-// 不符合 LLVM 风格的代码示例
+// ??? LLVM ???????
 
-// 缩进不一致
+// ?????
 void exampleFunction1() {
-     int a = 0; // 额外的空格
-     int b= 1;  // 缺少空格
-     int c =2;  // 缺少空格
-     int d =  3; // 多余的空格
+     int a = 0; // ?????
+     int b= 1;  // ????
+     int c =2;  // ????
+     int d =  3; // ?????
 
-     // 括号风格不一致
+     // ???????
      if (a == 0) {b = 1;}
      else {c = 2;}
 
-     // 缺少空格和括号
-     for(int i=0; i<10; i++){ printf("i: %d\n", i); }
-
-     // 函数体末尾缺少空行
-     return;
 }
-
-// 变量命名不规范（使用下划线命名法）
-void example_function_2() {
-    int my_variable = 0; // 使用下划线，不符合 LLVM 风格
-    // 函数体内有多个连续空行
-}
-
-// 文件末尾有空行
