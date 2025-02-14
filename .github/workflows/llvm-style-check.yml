@@ -12,12 +12,12 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4  # 检出代码
 
       - name: Install clang-format
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang-format
+          sudo apt-get install -y clang-format  # 安装 clang-format
 
       - name: Fetch all branches
         run: git fetch --prune --unshallow
@@ -50,7 +50,8 @@ jobs:
               echo "Checking $FILE..."
               
               # 运行 clang-format 并检查格式
-              if ! clang-format -style=llvm --dry-run -Werror "$FILE"; then
+              clang-format -style=LLVM --dry-run -Werror "$FILE"
+              if [ $? -ne 0 ]; then
                 echo "❌ Style issue in $FILE"
                 ERROR_FOUND=1
               fi
