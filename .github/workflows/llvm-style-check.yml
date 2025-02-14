@@ -1,4 +1,4 @@
-name: LLVM Style Check with Clang-Tidy
+name: LLVM Style Check with Clang-Format
 
 on:
   pull_request:
@@ -13,25 +13,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4  # 检出代码
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.x'  # 设置 Python 环境
-
-      - name: Install clang-tidy
+      - name: Install clang-format
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang-tidy  # 安装 clang-tidy
+          sudo apt-get install -y clang-format  # 安装 clang-format
 
-      - name: Generate compile_commands.json
-        run: |
-          # 如果你的项目使用 CMake，可以生成 compile_commands.json
-          mkdir build
-          cd build
-          cmake .. -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-          cd ..
-
-      - name: Run clang-tidy
+      - name: Check code style with clang-format
         run: |
           # 获取当前 PR 的变更文件
           CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRTUXB ${{ github.base_ref }}..${{ github.head_ref }})
@@ -39,9 +26,15 @@ jobs:
           # 检查每个文件是否符合 LLVM 风格
           for FILE in $CHANGED_FILES; do
             if [[ $FILE =~ \.(cpp|h|hpp)$ ]]; then  # 只检查 C++ 文件
-              clang-tidy -p build -checks=* -style=llvm $FILE -- -header-filter=.* 2>&1 | tee tidy.log
-              if grep -q "error:" tidy.log; then
-                echo "Style errors found in $FILE"
+              # 获取格式化后的代码
+              FORMATTED_CODE=$(clang-format -style=llvm "$FILE")
+
+              # 比较原始代码和格式化后的代码
+              if [ "$(cat "$FILE")" != "$FORMATTED_CODE" ]; then
+                echo "Style error in $FILE"
+                echo "Code does not conform to LLVM style."
+                echo "Formatted code:"
+                echo "$FORMATTED_CODE"
                 exit 1
               fi
             fi
