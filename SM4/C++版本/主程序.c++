@@ -296,3 +296,8 @@ if (X_array) free(X_array);
 
 return 0;
 }
+
+// Example of non-LLVM style code
+void exampleFunction() {
+     int a = 0; // Inconsistent indentation
+}
