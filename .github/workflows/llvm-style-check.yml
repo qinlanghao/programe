@@ -5,62 +5,21 @@ on:
     branches:
       - main
       - llvm-test
-      - llvm-test-1
+
 jobs:
   style-check:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest  # 或者 ubuntu-latest，看你的需求
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4  # 检出代码
+        uses: actions/checkout@v4
 
       - name: Install clang-format
         run: |
-          sudo apt-get update
-          sudo apt-get install -y clang-format  # 安装 clang-format
-
-      - name: Fetch all branches
-        run: git fetch --prune --unshallow
-
-      - name: Determine base and head branches
-        run: |
-          echo "Base Ref: ${{ github.base_ref }}"
-          echo "Head Ref: ${{ github.head_ref }}"
-          echo "BASE_BRANCH_NAME=${{ github.base_ref }}" >> $GITHUB_ENV
-          echo "HEAD_BRANCH_NAME=${{ github.head_ref }}" >> $GITHUB_ENV
+          choco install llvm -y  # Windows 下用 Chocolatey 安装 LLVM
 
       - name: Check code style with clang-format
         run: |
-          # 获取当前 PR 的变更文件
-          CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRTUXB origin/$BASE_BRANCH_NAME origin/$HEAD_BRANCH_NAME)
-
-          if [ -z "$CHANGED_FILES" ]; then
-            echo "No relevant files changed."
-            exit 0
-          fi
-
-          echo "Changed files:"
-          echo "$CHANGED_FILES"
-
-          # 记录格式化错误的文件
-          ERROR_FOUND=0
-
-          for FILE in $CHANGED_FILES; do
-            if [[ $FILE =~ \.(cpp|h|hpp)$ ]]; then  # 只检查 C++ 相关文件
-              echo "Checking $FILE..."
-              
-              # 运行 clang-format 并检查格式
-              clang-format -style=LLVM --dry-run -Werror "$FILE"
-              if [ $? -ne 0 ]; then
-                echo "❌ Style issue in $FILE"
-                ERROR_FOUND=1
-              fi
-            fi
-          done
-
-          if [ "$ERROR_FOUND" -eq 1 ]; then
-            echo "Code style issues detected. Please run clang-format before committing."
-            exit 1
-          fi
-
-          echo "✅ All files conform to LLVM style."
+          for %%F in (*.cpp *.h *.hpp) do (
+            clang-format -style=file --dry-run -Werror %%F
+          )
