@@ -8,49 +8,71 @@ on:
 
 jobs:
   style-check:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          fetch-depth: 0
 
       - name: Install clang-format
         run: |
-          choco install llvm -y
-          # 将路径写入全局环境变量
-          echo "C:\Program Files\LLVM\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
-      - name: Check code style with clang-format
-        shell: cmd
+          sudo apt-get update
+          sudo apt-get install -y clang-format
+
+      - name: Fetch all branches
+        run: git fetch --prune --unshallow
+
+      - name: Determine base and head branches
         run: |
-          setlocal enabledelayedexpansion
-          set "CLANG_FORMAT=C:\Program Files\LLVM\bin\clang-format.exe"
-          set "ERROR_FOUND=0"
-      
-          REM 验证clang-format存在
-          if not exist "%CLANG_FORMAT%" (
-              echo "Error: clang-format not found at %CLANG_FORMAT%"
-              exit /b 1
-          )
-      
-          REM 使用git获取需检查的文件（确保包含所有C/C++类型）
-          for /F "delims=" %%F in ('git ls-files *.cpp *.h *.hpp *.c *.cc *.cxx *.hxx') do (
-              echo Checking %%F...
-              
-              REM 使用完整带引号的路径执行
-              "%CLANG_FORMAT%" -style=file -fallback-style=LLVM "%%F" > "%%F.formatted"
-              
-              git diff --no-index --exit-code "%%F" "%%F.formatted"
-              if !errorlevel! neq 0 (
-                  echo ERROR: [%%F] 格式不符合LLVM规范
-                  git diff --no-index --color=always "%%F" "%%F.formatted"
-                  set "ERROR_FOUND=1"
-              )
-              del "%%F.formatted" 2>nul
-          )
-      
-          endlocal
-          if %ERROR_FOUND% equ 1 exit 1
-          echo All files passed LLVM style check
+          echo "Base Ref: ${{ github.base_ref }}"
+          echo "Head Ref: ${{ github.head_ref }}"
+          echo "BASE_BRANCH_NAME=${{ github.base_ref }}" >> $GITHUB_ENV
+          echo "HEAD_BRANCH_NAME=${{ github.head_ref }}" >> $GITHUB_ENV
+
+      - name: Check code style with clang-format and diff
+        run: |
+          # 获取当前 PR 的变更文件
+          CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRTUXB origin/$BASE_BRANCH_NAME origin/$HEAD_BRANCH_NAME)
+
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "No relevant files changed."
+            exit 0
+          fi
+
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+
+          ERROR_FOUND=0
+
+          # 遍历所有变更文件
+          for FILE in $CHANGED_FILES; do
+            if [[ $FILE =~ \.(cpp|h|hpp)$ ]]; then
+              echo "DEBUG: Checking file: $FILE"
+              # 使用 clang-format 格式化后保存到临时文件
+              clang-format -style=LLVM "$FILE" > formatted.tmp
+              # 比较原始文件和格式化后的文件
+              DIFF=$(diff "$FILE" formatted.tmp)
+              if [ "$DIFF" != "" ]; then
+                echo "❌ Style issue in $FILE:"
+                echo "$DIFF"
+                ERROR_FOUND=1
+              else
+                echo "✅ $FILE conforms to LLVM style."
+              fi
+              # 输出调试信息，显示文件内容（可选）
+              # echo "DEBUG: Original file content:"
+              # cat "$FILE"
+              # echo "DEBUG: Formatted file content:"
+              # cat formatted.tmp
+            fi
+          done
+
+          # 删除临时文件
+          rm -f formatted.tmp
+
+          if [ "$ERROR_FOUND" -eq 1 ]; then
+            echo "Code style issues detected. Please run clang-format to fix the issues."
+            exit 1
+          fi
+
+          echo "✅ All files conform to LLVM style."
