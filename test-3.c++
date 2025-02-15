@@ -1,5 +1,3 @@
-// 3. 宏定义不符合 LLVM 风格
-#define MAX_SIZE 1024
 
 // 4. 函数参数风格不一致
 void exampleFunction3(int a, int  b, int   c) {

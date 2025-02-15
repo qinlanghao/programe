@@ -48,7 +48,3 @@ void example_function_2() {
 }
 
 
-
-// 5. 注释风格不一致
-// This is a comment
-// Another comment
