@@ -18,8 +18,10 @@ jobs:
         run: |
           choco install llvm -y  # Windows 下用 Chocolatey 安装 LLVM
 
-      - name: Check code style with clang-format
+      - name: Check code style with clang-format (CMD)
+        shell: cmd
         run: |
           for %%F in (*.cpp *.h *.hpp) do (
             clang-format -style=file --dry-run -Werror %%F
           )
+        
