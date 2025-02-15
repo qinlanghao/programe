@@ -1,0 +1,28 @@
+      - name: Check formatting
+        run: |
+          # 获取准确的变更文件列表
+          CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRTUXB "${{ github.event.pull_request.base.sha }}".."${{ github.event.pull_request.head.sha }}")
+          echo "Changed files: ${CHANGED_FILES}"
+
+          ERROR_FOUND=0
+          IFS=$'\n'  # 处理含空格的文件名
+          for FILE in $CHANGED_FILES; do
+            if [[ "$FILE" =~ \.(c|cc|cpp|cxx|h|hh|hpp|hxx)$ ]]; then
+              echo "Checking: $FILE"
+              
+              # 生成格式化临时文件
+              TEMP_FILE="${FILE}.formatted"
+              clang-format -style=file -fallback-style=LLVM "$FILE" > "$TEMP_FILE"
+              
+              # 对比差异
+              if ! diff -u --color=always "$FILE" "$TEMP_FILE"; then
+                echo "::error file=$FILE::Code style issues detected"
+                ERROR_FOUND=1
+              fi
+              rm "$TEMP_FILE"
+            fi
+          done
+
+          if [ "$ERROR_FOUND" -eq 1 ]; then
+            exit 1
+          fi

@@ -2,7 +2,7 @@ name: LLVM Style Check
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, llvm-test]
 
 jobs:
   clang-format-check:
