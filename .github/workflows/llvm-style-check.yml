@@ -27,7 +27,8 @@ jobs:
 
           REM 遍历当前目录及子目录下所有 C++ 文件
           for /R %%F in (*.cpp *.h *.hpp) do (
-            echo Checking %%F...
+            echo Checking %%F...  REM 输出当前检测的文件名
+
             REM 生成格式化后的临时文件
             clang-format -style=file "%%F" > formatted.tmp
             REM 比较原文件和格式化后的文件
