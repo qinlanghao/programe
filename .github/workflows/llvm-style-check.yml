@@ -11,22 +11,39 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # 确保获取完整提交历史
+          fetch-depth: 0
 
-      - name: Install clang-format 18
+      - name: Install clang-format-18
         run: |
-          sudo apt-get update
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 18
           sudo apt-get install -y clang-format-18
-          sudo update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-18 100
-          echo "Clang-Format version: $(clang-format --version)"
+          sudo ln -sf /usr/bin/clang-format-18 /usr/bin/clang-format
 
-      - name: List all files (Debug)
-        run: ls -R  # 调试输出目录结构
+      - name: Verify installation
+        run: |
+          echo "Clang-Format Path: $(which clang-format)"
+          clang-format --version
 
-      - name: Run clang-format Lint (DoozyX)
-        uses: DoozyX/clang-format-lint-action@v0.8
-        with:
-          source: ./  # 指定源代码根目录
-          extensions: c,cc,cpp,cxx,h,hh,hpp,hxx  # 支持的文件扩展名
-          clangFormatVersion: 18  # 指定 clang-format 版本
-          style: LLVM  # 使用 LLVM 风格
+      - name: Run clang-format check
+        run: |
+          # 获取所有需要检查的文件
+          CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRTUXB HEAD^ HEAD)
+          echo "Changed files: $CHANGED_FILES"
+
+          # 执行格式化检查
+          ERROR_FOUND=0
+          for FILE in $CHANGED_FILES; do
+            if [[ $FILE =~ \.(c|cc|cpp|cxx|h|hh|hpp|hxx)$ ]]; then
+              echo "Checking $FILE"
+              if ! clang-format -style=file --Werror --dry-run "$FILE"; then
+                echo "::error file=$FILE::Code style issues detected"
+                ERROR_FOUND=1
+              fi
+            fi
+          done
+
+          if [ $ERROR_FOUND -eq 1 ]; then
+            exit 1
+          fi
