@@ -1,93 +1,52 @@
-name: LLVM Style Check with Clang-Format
+name: LLVM Style Check
 
 on:
   pull_request:
-    branches:
-      - main
-      - llvm-test
+    branches: [main, llvm-test]
 
 jobs:
-  style-check:
+  clang-format-check:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # 获取完整提交历史
+          fetch-depth: 0  # 确保获取完整提交历史
 
       - name: Install clang-format
         run: |
           sudo apt-get update
           sudo apt-get install -y clang-format
-          echo "Clang-format version:"
-          clang-format --version
+          echo "Clang-Format version: $(clang-format --version)"
 
-      - name: Setup branch info
-        run: |
-          echo "GITHUB_BASE_REF: ${{ github.base_ref }}"
-          echo "GITHUB_HEAD_REF: ${{ github.head_ref }}"
-          echo "BASE_SHA: ${{ github.event.pull_request.base.sha }}"
-          echo "HEAD_SHA: ${{ github.event.pull_request.head.sha }}"
+      - name: List all files (Debug)
+        run: ls -R  # 调试输出目录结构
 
-      - name: Get changed files
-        id: changed-files
+      - name: Check formatting
         run: |
-          # 使用准确的SHA进行对比
-          CHANGED_FILES=$(git diff --name-only --diff-filter=d ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }})
-          echo "Detected changed files:"
-          echo "$CHANGED_FILES"
-          
-          # 存储为输出变量
-          echo "changed_files<<EOF" >> $GITHUB_OUTPUT
-          echo "$CHANGED_FILES" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-
-      - name: Check code style
-        run: |
-          # 显示实际收到的文件列表
-          echo "Processing files:"
-          echo "${{ steps.changed-files.outputs.changed_files }}"
+          # 获取准确的变更文件列表
+          CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRTUXB "${{ github.event.pull_request.base.sha }}".."${{ github.event.pull_request.head.sha }}")
+          echo "Changed files: ${CHANGED_FILES}"
 
           ERROR_FOUND=0
-          COUNTER=0
-
-          # 设置IFS处理包含空格的文件名
-          IFS=$'\n'
-          for FILE in ${{ steps.changed-files.outputs.changed_files }}; do
-            COUNTER=$((COUNTER+1))
-            echo "Processing file #$COUNTER: [$FILE]"
-
-            # 检查文件扩展名
+          IFS=$'\n'  # 处理含空格的文件名
+          for FILE in $CHANGED_FILES; do
             if [[ "$FILE" =~ \.(c|cc|cpp|cxx|h|hh|hpp|hxx)$ ]]; then
-              echo "✅ Valid C++ file: $FILE"
-
-              # 生成临时文件
-              TEMP_FILE="${FILE}.formatted"
+              echo "Checking: $FILE"
               
-              # 调试输出
-              echo "Clang-format command: clang-format -style=LLVM '$FILE' > '$TEMP_FILE'"
-              clang-format -style=LLVM "$FILE" > "$TEMP_FILE"
-
-              # 比较差异
-              echo "Diff command: diff -u --color=always '$FILE' '$TEMP_FILE'"
+              # 生成格式化临时文件
+              TEMP_FILE="${FILE}.formatted"
+              clang-format -style=file -fallback-style=LLVM "$FILE" > "$TEMP_FILE"
+              
+              # 对比差异
               if ! diff -u --color=always "$FILE" "$TEMP_FILE"; then
-                echo "❌ Style issues found in: $FILE"
                 echo "::error file=$FILE::Code style issues detected"
                 ERROR_FOUND=1
-              else
-                echo "✅ No issues in: $FILE"
               fi
-
-              rm -f "$TEMP_FILE"
-            else
-              echo "⏩ Skipping non-C++ file: $FILE"
+              rm "$TEMP_FILE"
             fi
-            echo "----------------------------------------"
           done
 
           if [ "$ERROR_FOUND" -eq 1 ]; then
-            echo "::error::Code style issues detected"
             exit 1
           fi
-          echo "All files passed LLVM style check"
