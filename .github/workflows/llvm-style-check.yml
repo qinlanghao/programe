@@ -13,23 +13,21 @@ jobs:
         with:
           fetch-depth: 0  # 确保获取完整提交历史
 
-      - name: Install clang-format
+      - name: Install clang-format 18
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang-format
-          echo "Installed Clang-Format version: $(clang-format --version)"
-          sudo update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format 100
-          echo "Default Clang-Format version: $(clang-format --version)"
+          sudo apt-get install -y clang-format-18
+          sudo update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-18 100
+          echo "Clang-Format version: $(clang-format --version)"
 
       - name: List all files (Debug)
         run: ls -R  # 调试输出目录结构
 
-      - name: Check formatting with custom script (Debug)
+      - name: Check formatting
         run: |
-          echo "Starting custom formatting check..."
           # 获取准确的变更文件列表
           CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRTUXB "${{ github.event.pull_request.base.sha }}".."${{ github.event.pull_request.head.sha }}")
-          echo "Changed files: $CHANGED_FILES"
+          echo "Changed files: ${CHANGED_FILES}"
 
           ERROR_FOUND=0
           IFS=$'\n'  # 处理含空格的文件名
@@ -51,30 +49,13 @@ jobs:
           done
 
           if [ "$ERROR_FOUND" -eq 1 ]; then
-            echo "Custom formatting check failed."
             exit 1
-          else
-            echo "Custom formatting check passed."
           fi
 
-      - name: Run clang-format Lint (DoozyX) (Debug)
+      - name: Run clang-format Lint (DoozyX)
         uses: DoozyX/clang-format-lint-action@v0.8
         with:
           source: ./  # 指定源代码根目录
           extensions: c,cc,cpp,cxx,h,hh,hpp,hxx  # 支持的文件扩展名
-          clangFormatVersion: 17  # 指定 clang-format 版本
+          clangFormatVersion: 18  # 指定 clang-format 版本
           style: LLVM  # 使用 LLVM 风格
-        env:
-          DEBUG: true  # 启用调试模式
-
-      - name: Display Action Configuration (Debug)
-        run: |
-          echo "DoozyX Action Configuration:"
-          echo "Source: ${{ steps.run-clang-format-lint.outputs.source }}"
-          echo "Extensions: ${{ steps.run-clang-format-lint.outputs.extensions }}"
-          echo "clangFormatVersion: ${{ steps.run-clang-format-lint.outputs.clangFormatVersion }}"
-          echo "Style: ${{ steps.run-clang-format-lint.outputs.style }}"
-
-      - name: Show Environment Variables (Debug)
-        run: |
-          printenv | sort
