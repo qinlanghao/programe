@@ -1,0 +1,28 @@
+name: LLVM Style Check
+
+on:
+  pull_request:
+    branches: [main, llvm-test]
+jobs:
+  clang-format-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 确保获取完整提交历史
+
+      - name: Install clang-format 17
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-format-17
+          sudo update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-17 100
+          echo "Clang-Format version: $(clang-format --version)"
+
+      - name: Run clang-format Lint
+        uses: DoozyX/clang-format-lint-action@v0.8
+        with:
+          source: ./  # 指定源代码根目录
+          extensions: c,cc,cpp,cxx,h,hh,hpp,hxx  # 支持的文件扩展名
+          clangFormatVersion: 17  # 指定 clang-format 版本
+          style: LLVM  # 使用 LLVM 风格
