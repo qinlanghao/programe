@@ -8,45 +8,47 @@ on:
 
 jobs:
   style-check:
-    runs-on: ubuntu-latest  # 运行在 Linux (Ubuntu)
+    runs-on: windows-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
 
       - name: Install clang-format
         run: |
-          sudo apt-get update
-          sudo apt-get install -y clang-format
+          choco install llvm -y
+          echo "C:\Program Files\LLVM\bin" >> $env:GITHUB_PATH
 
       - name: Check code style with clang-format
+        shell: cmd
         run: |
-          ERROR_FOUND=0
-          
-          # 查找所有 C++ 文件
-          CHANGED_FILES=$(find . -type f \( -name "*.cpp" -o -name "*.h" -o -name "*.hpp" \))
+          setlocal enabledelayedexpansion
+          set "ERROR_FOUND=0"
 
-          for FILE in $CHANGED_FILES; do
-            echo "Checking $FILE..."  # 输出当前检测的文件名
+          REM 验证clang-format可用性
+          where clang-format || exit /B 1
 
-            # 生成格式化后的临时文件
-            clang-format -style=file "$FILE" > formatted.tmp
+          REM 获取所有需要检查的文件（扩展可自定义）
+          for /F "delims=" %%F in ('git ls-files *.cpp *.h *.hpp *.c *.cc *.cxx *.hxx') do (
+            echo Checking %%F...
 
-            # 比较原文件和格式化后的文件
-            if ! diff -u "$FILE" formatted.tmp > diff_output.txt; then
-              echo "⚠️ WARNING: File $FILE does not conform to LLVM style!"
-              cat diff_output.txt  # 输出具体的格式错误
-              ERROR_FOUND=1
-            fi
-          done
+            REM 生成格式化文件并比较差异
+            clang-format -style=file -fallback-style=LLVM "%%F" > "%%F.formatted"
+            
+            git diff --no-index --ignore-cr-at-eol --exit-code "%%F" "%%F.formatted"
+            if !errorlevel! neq 0 (
+              echo ERROR: [%%F] does not conform to LLVM style
+              echo "===== Differences ====="
+              git diff --no-index --ignore-all-space --color=always "%%F" "%%F.formatted"
+              echo.
+              set "ERROR_FOUND=1"
+            )
+            del "%%F.formatted" 2>nul
+          )
 
-          # 清理临时文件
-          rm -f formatted.tmp diff_output.txt
-
-          # 如果有错误，则退出 1 终止 workflow
-          if [[ $ERROR_FOUND -eq 1 ]]; then
-            echo "❌ Code style issues detected. Please run clang-format to fix the issues."
-            exit 1
-          else
-            echo "✅ All files conform to LLVM style."
-          fi
+          endlocal
+          if %ERROR_FOUND% equ 1 exit 1
+          echo All files passed LLVM style check
