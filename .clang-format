@@ -1,10 +1,41 @@
+# .clang-format configuration file for LLVM code style
 BasedOnStyle: LLVM
-IndentWidth: 4
-TabWidth: 4
-UseTab: Never
-ContinuationIndentWidth: 4
-SpacesBeforeTrailingComments: 3
-SpaceBeforeParens: ControlStatements
-SpaceInEmptyParentheses: false
-SpacesInParentheses: false
-SpacesInSquareBrackets: false
+IndentWidth: 2               # 缩进使用 2 个空格
+UseTab: Never                 # 不使用制表符（Tabs）
+ColumnLimit: 80               # 每行的最大字符数 80
+BraceWrapping:
+  AfterFunction: true         # 函数大括号在声明行内
+  AfterControlStatement: true # 控制结构（如 if, for）的大括号与声明在同一行
+  SplitEmptyFunction: true    # 空函数大括号独立一行
+  AfterEnum: true             # 枚举类型的大括号在同一行
+
+# 注释配置
+CommentPragmas: '^(TODO|FIXME|XXX):' # 支持 TODO、FIXME、XXX 注释
+Doxygen: true                  # 启用 Doxygen 注释风格
+Documentation: true            # 自动注释生成
+
+# 语言相关设置
+Cpp11: true                    # 启用 C++11 标准及以上版本
+SortIncludes: true              # 自动排序 #include
+IncludeBlocks: 'Always'         # 总是把头文件单独列在一块
+
+# 代码结构
+AllowAllParametersOfDeclarationOnNextLine: true
+KeepEmptyLinesAtTheStartOfBlocks: false
+NamespaceIndentation: All      # 命名空间缩进
+AlignConsecutiveAssignments: true
+
+# 命名规范
+CamelCaseType: true            # 类名与结构体名使用 PascalCase
+CamelCaseFunctions: true       # 函数和变量使用 camelCase
+AllowShortFunctionsOnASingleLine: false
+
+# 类型转换
+DerivePointerAlignment: false  # 优先使用 C++ 风格的类型转换（如 static_cast）
+
+# 自动类型推导
+UseAuto: true                  # 尽可能使用 auto 类型推导
+
+# 空格与括号
+SpaceBeforeParens: ControlStatements # 在控制语句（如 if、for）前加空格
+SpaceBeforeCtorInitializer: true # 构造函数初始化器前有空格

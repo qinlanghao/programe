@@ -8,7 +8,7 @@ on:
 
 jobs:
   style-check:
-    runs-on: windows-latest  # 或者 ubuntu-latest，看你的需求
+    runs-on: windows-latest
 
     steps:
       - name: Checkout code
@@ -16,12 +16,36 @@ jobs:
 
       - name: Install clang-format
         run: |
-          choco install llvm -y  # Windows 下用 Chocolatey 安装 LLVM
+          choco install llvm -y
 
       - name: Check code style with clang-format (CMD)
         shell: cmd
         run: |
-          for %%F in (*.cpp *.h *.hpp) do (
-            clang-format -style=file --dry-run -Werror %%F
+          REM 启用延迟变量扩展
+          setlocal enabledelayedexpansion
+          set "ERROR_FOUND=0"
+
+          REM 遍历当前目录及子目录下所有 C++ 文件
+          for /R %%F in (*.cpp *.h *.hpp) do (
+            echo Checking %%F...
+            REM 生成格式化后的临时文件
+            clang-format -style=file "%%F" > formatted.tmp
+            REM 比较原文件和格式化后的文件
+            fc "%%F" formatted.tmp > diff_output.txt
+            if errorlevel 1 (
+              echo WARNING: File %%F does not conform to LLVM style. Differences:
+              type diff_output.txt
+              echo.
+              set "ERROR_FOUND=1"
+            )
           )
-        
+          REM 删除临时文件
+          del formatted.tmp
+          del diff_output.txt
+
+          if "!ERROR_FOUND!"=="1" (
+            echo Code style issues detected. Please run clang-format to fix the issues.
+            exit /B 1
+          ) else (
+            echo All files conform to LLVM style.
+          )
