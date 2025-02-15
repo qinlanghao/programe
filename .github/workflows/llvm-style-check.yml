@@ -22,7 +22,7 @@ jobs:
       - name: List all files (Debug)
         run: ls -R  # 调试输出目录结构
 
-      - name: Check formatting
+      - name: Check formatting with custom script
         run: |
           # 获取准确的变更文件列表
           CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRTUXB "${{ github.event.pull_request.base.sha }}".."${{ github.event.pull_request.head.sha }}")
@@ -50,3 +50,11 @@ jobs:
           if [ "$ERROR_FOUND" -eq 1 ]; then
             exit 1
           fi
+
+      - name: Run clang-format Lint (DoozyX)
+        uses: DoozyX/clang-format-lint-action@v0.8
+        with:
+          source: ./  # 指定源代码根目录
+          extensions: c,cc,cpp,cxx,h,hh,hpp,hxx  # 支持的文件扩展名
+          clangFormatVersion: 17  # 指定 clang-format 版本
+          style: LLVM  # 使用 LLVM 风格
