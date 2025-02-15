@@ -1,6 +1,9 @@
 // Example.cpp
 // 非 LLVM 风格的代码示例
 
+int main() { int i; return;}
+
+
 // 1. 缩进不一致
 void exampleFunction1()
 {
