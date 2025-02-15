@@ -15,6 +15,7 @@ jobs:
 
       - name: Install clang-format-18
         run: |
+          echo "*** Installing LLVM 18 and clang-format-18 ***"
           wget https://apt.llvm.org/llvm.sh
           chmod +x llvm.sh
           sudo ./llvm.sh 18
@@ -29,21 +30,30 @@ jobs:
       - name: Run clang-format check
         run: |
           # 获取所有需要检查的文件
+          echo "*** Retrieving changed files ***"
           CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRTUXB HEAD^ HEAD)
           echo "Changed files: $CHANGED_FILES"
 
           # 执行格式化检查
           ERROR_FOUND=0
+          echo "*** Starting formatting check ***"
           for FILE in $CHANGED_FILES; do
-            if [[ $FILE =~ \.(c|cc|cpp|cxx|h|hh|hpp|hxx|c++)$ ]]; then
-              echo "Checking $FILE"
+            if [[ $FILE =~ \.(c|cc|cpp|cxx|h|hh|hpp|hxx)$ ]]; then
+              echo "Checking $FILE with clang-format"
               if ! clang-format -style=file --Werror --dry-run "$FILE"; then
                 echo "::error file=$FILE::Code style issues detected"
                 ERROR_FOUND=1
+              else
+                echo "No issues found in $FILE"
               fi
+            else
+              echo "Skipping $FILE (unsupported extension)"
             fi
           done
 
           if [ $ERROR_FOUND -eq 1 ]; then
+            echo "*** Formatting check failed ***"
             exit 1
+          else
+            echo "*** Formatting check passed ***"
           fi
