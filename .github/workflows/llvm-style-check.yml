@@ -20,35 +20,37 @@ jobs:
       - name: Install clang-format
         run: |
           choco install llvm -y
-          echo "C:\Program Files\LLVM\bin" >> $env:GITHUB_PATH
-
+          # 将路径写入全局环境变量
+          echo "C:\Program Files\LLVM\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
       - name: Check code style with clang-format
         shell: cmd
         run: |
           setlocal enabledelayedexpansion
+          set "CLANG_FORMAT=C:\Program Files\LLVM\bin\clang-format.exe"
           set "ERROR_FOUND=0"
-
-          REM 验证clang-format可用性
-          where clang-format || exit /B 1
-
-          REM 获取所有需要检查的文件（扩展可自定义）
-          for /F "delims=" %%F in ('git ls-files *.cpp *.h *.hpp *.c *.cc *.cxx *.hxx') do (
-            echo Checking %%F...
-
-            REM 生成格式化文件并比较差异
-            clang-format -style=file -fallback-style=LLVM "%%F" > "%%F.formatted"
-            
-            git diff --no-index --ignore-cr-at-eol --exit-code "%%F" "%%F.formatted"
-            if !errorlevel! neq 0 (
-              echo ERROR: [%%F] does not conform to LLVM style
-              echo "===== Differences ====="
-              git diff --no-index --ignore-all-space --color=always "%%F" "%%F.formatted"
-              echo.
-              set "ERROR_FOUND=1"
-            )
-            del "%%F.formatted" 2>nul
+      
+          REM 验证clang-format存在
+          if not exist "%CLANG_FORMAT%" (
+              echo "Error: clang-format not found at %CLANG_FORMAT%"
+              exit /b 1
           )
-
+      
+          REM 使用git获取需检查的文件（确保包含所有C/C++类型）
+          for /F "delims=" %%F in ('git ls-files *.cpp *.h *.hpp *.c *.cc *.cxx *.hxx') do (
+              echo Checking %%F...
+              
+              REM 使用完整带引号的路径执行
+              "%CLANG_FORMAT%" -style=file -fallback-style=LLVM "%%F" > "%%F.formatted"
+              
+              git diff --no-index --exit-code "%%F" "%%F.formatted"
+              if !errorlevel! neq 0 (
+                  echo ERROR: [%%F] 格式不符合LLVM规范
+                  git diff --no-index --color=always "%%F" "%%F.formatted"
+                  set "ERROR_FOUND=1"
+              )
+              del "%%F.formatted" 2>nul
+          )
+      
           endlocal
           if %ERROR_FOUND% equ 1 exit 1
           echo All files passed LLVM style check
