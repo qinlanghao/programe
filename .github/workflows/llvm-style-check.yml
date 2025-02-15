@@ -13,11 +13,12 @@ jobs:
         with:
           fetch-depth: 0  # 确保获取完整提交历史
 
-      - name: Install clang-format
+      - name: Install clang-format 17
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang-format
-          echo "Clang-Format version: $(clang-format --version)"
+          sudo apt-get install -y clang-format-17  # 安装 clang-format 17
+          sudo update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-17 100  # 设置为默认版本
+          echo "Clang-Format version: $(clang-format --version)"  # 确保版本为 17
 
       - name: List all files (Debug)
         run: ls -R  # 调试输出目录结构
