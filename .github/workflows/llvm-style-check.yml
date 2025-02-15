@@ -5,7 +5,7 @@ on:
     branches:
       - main
       - llvm-test
-
+      - llvm-test-1
 jobs:
   style-check:
     runs-on: ubuntu-latest
