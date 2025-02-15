@@ -35,7 +35,7 @@ jobs:
           # 执行格式化检查
           ERROR_FOUND=0
           for FILE in $CHANGED_FILES; do
-            if [[ $FILE =~ \.(c|cc|cpp|cxx|h|hh|hpp|hxx)$ ]]; then
+            if [[ $FILE =~ \.(c|cc|cpp|cxx|h|hh|hpp|hxx|c++)$ ]]; then
               echo "Checking $FILE"
               if ! clang-format -style=file --Werror --dry-run "$FILE"; then
                 echo "::error file=$FILE::Code style issues detected"
