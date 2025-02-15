@@ -11,35 +11,34 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # 确保获取完整提交历史
+          fetch-depth: 0
 
       - name: Install clang-format 17
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang-format-17  # 安装 clang-format 17
-          sudo update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-17 100  # 设置为默认版本
-          echo "Clang-Format version: $(clang-format --version)"  # 确保版本为 17
+          sudo apt-get install -y clang-format-17
+          sudo update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-17 100
+          echo "Clang-Format version: $(clang-format --version)"
+          which clang-format  # Debug to ensure clang-format is available
 
       - name: List all files (Debug)
-        run: ls -R  # 调试输出目录结构
+        run: ls -R
 
       - name: Check formatting with custom script
         run: |
-          # 获取准确的变更文件列表
           CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRTUXB "${{ github.event.pull_request.base.sha }}".."${{ github.event.pull_request.head.sha }}")
           echo "Changed files: ${CHANGED_FILES}"
 
           ERROR_FOUND=0
-          IFS=$'\n'  # 处理含空格的文件名
+          IFS=$'\n'
           for FILE in $CHANGED_FILES; do
             if [[ "$FILE" =~ \.(c|cc|cpp|cxx|h|hh|hpp|hxx)$ ]]; then
               echo "Checking: $FILE"
-              
-              # 生成格式化临时文件
               TEMP_FILE="${FILE}.formatted"
+              
+              # Use the full path if necessary
               clang-format -style=file -fallback-style=LLVM "$FILE" > "$TEMP_FILE"
               
-              # 对比差异
               if ! diff -u --color=always "$FILE" "$TEMP_FILE"; then
                 echo "::error file=$FILE::Code style issues detected"
                 ERROR_FOUND=1
@@ -55,7 +54,7 @@ jobs:
       - name: Run clang-format Lint (DoozyX)
         uses: DoozyX/clang-format-lint-action@v0.8
         with:
-          source: ./  # 指定源代码根目录
-          extensions: c,cc,cpp,cxx,h,hh,hpp,hxx  # 支持的文件扩展名
-          clangFormatVersion: 17  # 指定 clang-format 版本
-          style: LLVM  # 使用 LLVM 风格
+          source: ./  
+          extensions: c,cc,cpp,cxx,h,hh,hpp,hxx  
+          clangFormatVersion: 17  
+          style: LLVM
