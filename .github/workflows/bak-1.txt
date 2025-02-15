@@ -11,42 +11,49 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # 确保获取完整提交历史
+          fetch-depth: 0
 
-      - name: Install clang-format
+      - name: Install clang-format-18
         run: |
-          sudo apt-get update
-          sudo apt-get install -y clang-format
-          echo "Clang-Format version: $(clang-format --version)"
+          echo "*** Installing LLVM 18 and clang-format-18 ***"
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 18
+          sudo apt-get install -y clang-format-18
+          sudo ln -sf /usr/bin/clang-format-18 /usr/bin/clang-format
 
-      - name: List all files (Debug)
-        run: ls -R  # 调试输出目录结构
-
-      - name: Check formatting
+      - name: Verify installation
         run: |
-          # 获取准确的变更文件列表
-          CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRTUXB "${{ github.event.pull_request.base.sha }}".."${{ github.event.pull_request.head.sha }}")
-          echo "Changed files: ${CHANGED_FILES}"
+          echo "Clang-Format Path: $(which clang-format)"
+          clang-format --version
 
+      - name: Run clang-format check
+        run: |
+          # 获取所有需要检查的文件
+          echo "*** Retrieving changed files ***"
+          CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRTUXB HEAD^ HEAD)
+          echo "Changed files: $CHANGED_FILES"
+
+          # 执行格式化检查
           ERROR_FOUND=0
-          IFS=$'\n'  # 处理含空格的文件名
+          echo "*** Starting formatting check ***"
           for FILE in $CHANGED_FILES; do
-            if [[ "$FILE" =~ \.(c|cc|cpp|cxx|h|hh|hpp|hxx)$ ]]; then
-              echo "Checking: $FILE"
-              
-              # 生成格式化临时文件
-              TEMP_FILE="${FILE}.formatted"
-              clang-format -style=file -fallback-style=LLVM "$FILE" > "$TEMP_FILE"
-              
-              # 对比差异
-              if ! diff -u --color=always "$FILE" "$TEMP_FILE"; then
+            if [[ $FILE =~ \.(c|cc|cpp|c++|cxx|h|hh|hpp|hxx)$ ]]; then
+              echo "Checking $FILE with clang-format"
+              if ! clang-format -style=file --Werror --dry-run "$FILE"; then
                 echo "::error file=$FILE::Code style issues detected"
                 ERROR_FOUND=1
+              else
+                echo "No issues found in $FILE"
               fi
-              rm "$TEMP_FILE"
+            else
+              echo "Skipping $FILE (unsupported extension)"
             fi
           done
 
-          if [ "$ERROR_FOUND" -eq 1 ]; then
+          if [ $ERROR_FOUND -eq 1 ]; then
+            echo "*** Formatting check failed ***"
             exit 1
+          else
+            echo "*** Formatting check passed ***"
           fi
